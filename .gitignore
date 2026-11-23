@@ -7,3 +7,6 @@ data/raw/
 dbt/target/
 dbt/logs/
 logs/
+dbt/.user.yml
+mlruns/
+mlflow.db

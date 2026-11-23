@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: ml_order_features
+    description: Late-delivery model features, one row per non-canceled order. Only uses information known at purchase time.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: promised_days
+        data_tests: [not_null]
