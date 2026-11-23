@@ -1,0 +1,8 @@
+# Run dbt from this folder: the path is relative to it.
+marketplace_pulse:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PATH', '../data/warehouse.duckdb') }}"
+      threads: 4
