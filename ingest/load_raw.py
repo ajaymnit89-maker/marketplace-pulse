@@ -34,7 +34,7 @@ def check(con, expect_counts=True):
     """Return a list of failure messages; empty means all checks passed."""
     failures = []
     for table, (_, key, expected) in TABLES.items():
-        n = con.execute(f"select count(*) from raw.{table}").fetchone()[0]
+        n = con.execute(f"select count(*) from raw.{table}").fetchall()[0][0]
         if expect_counts and n != expected:
             failures.append(f"{table}: {n} rows, expected {expected}")
         if key:
@@ -42,15 +42,15 @@ def check(con, expect_counts=True):
             nulls = " or ".join(f"{c} is null" for c in key)
             dupes = con.execute(
                 f"select count(*) from (select {cols} from raw.{table} group by {cols} having count(*) > 1)"
-            ).fetchone()[0]
-            null_keys = con.execute(f"select count(*) from raw.{table} where {nulls}").fetchone()[0]
+            ).fetchall()[0][0]
+            null_keys = con.execute(f"select count(*) from raw.{table} where {nulls}").fetchall()[0][0]
             if dupes:
                 failures.append(f"{table}: {dupes} duplicate keys on ({cols})")
             if null_keys:
                 failures.append(f"{table}: {null_keys} null keys on ({cols})")
     orphans = con.execute(
         "select count(*) from raw.order_items i anti join raw.orders o using (order_id)"
-    ).fetchone()[0]
+    ).fetchall()[0][0]
     if orphans:
         failures.append(f"order_items: {orphans} rows with no matching order")
     return failures

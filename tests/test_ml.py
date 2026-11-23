@@ -37,3 +37,35 @@ def test_segment_names():
     assert name_segment(p(review=1.8), 200) == "Unhappy, delivered on time"
     assert name_segment(p(recency=380), 200) == "Happy, lapsed"
     assert name_segment(p(recency=120), 200) == "Happy, recent"
+
+
+def test_review_parse_keeps_only_valid_unique_ids():
+    import json
+
+    from ai.review_enrich import chunks, parse_result
+
+    entry = {"translation_en": "x", "topic": "other", "sentiment": "negative", "mentions_delay": False}
+    text = json.dumps({"reviews": [{"id": "a", **entry}, {"id": "a", **entry}, {"id": "zzz", **entry}]})
+    assert [e["id"] for e in parse_result(text, {"a", "b"})] == ["a"]
+    assert [len(c) for c in chunks(list(range(120)))] == [50, 50, 20]
+
+
+def test_sql_guard():
+    from ai.analyst_agent import check_sql
+
+    assert check_sql("select count(*) from marts.fct_orders") is None
+    assert check_sql("with x as (select 1) select * from x;") is None
+    assert check_sql("drop table marts.fct_orders") is not None
+    assert check_sql("select 1; select 2") is not None
+    assert check_sql("select * from raw.orders") is not None
+    assert check_sql("select * from staging.stg_orders") is not None
+
+
+def test_eval_grader():
+    from ai.eval_agent import numbers_in, passes
+
+    assert numbers_in("GMV was R$15.7M and 1,234 orders") == [15.7e6, 1234.0]
+    assert passes("About R$15.74 million in total.", 15_735_527, ("rel", 0.01))
+    assert not passes("About R$14 million.", 15_735_527, ("rel", 0.01))
+    assert passes("The on-time rate is 93.2%.", 93.22, ("abs", 0.15))
+    assert passes("Alagoas (AL) is the worst.", "AL", None)

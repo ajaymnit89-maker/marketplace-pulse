@@ -10,3 +10,4 @@ logs/
 dbt/.user.yml
 mlruns/
 mlflow.db
+data/ai/

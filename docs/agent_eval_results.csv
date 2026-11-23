@@ -1,0 +1,91 @@
+question,expected,passed,cost_usd,answer,sql
+"What is total GMV in BRL, excluding canceled orders?",15735527.029999034,True,0.006834,"Total GMV is **R$15,735,527.03** (about R$15.74M), from 98,207 orders that weren't canceled.
+
+I used the standard definition: the sum of `order_value` (item price plus freight) in `fct_orders`, where `is_canceled = false`, across the whole dataset from Sep 2016 to Aug 2018.","SELECT sum(order_value) AS gmv, count(*) AS orders FROM marts.fct_orders WHERE is_canceled = false"
+"How many orders were placed, excluding canceled ones?",98207,True,0.007209999999999999,"Excluding canceled orders, **98,207 orders** were placed on Olist between 2016-09-04 and 2018-09-03.
+
+This uses the standard Orders metric, a count of `order_id` in `fct_orders` where `is_canceled = false`, across the full dataset. Orders in every other status are included, including ones not yet delivered.","SELECT count(order_id) AS orders, min(purchase_date), max(purchase_date) FROM marts.fct_orders WHERE is_canceled = false"
+What is the average order value (AOV) in BRL?,160.22816123085966,True,0.0064860000000000004,"The average order value is **about R$160.23**. That comes from R$15.74M in GMV divided by 98,207 orders.
+
+I left out canceled orders, as the standard metric definition says to. GMV here is item price plus freight, and the figure covers every order from Sep 2016 to Aug 2018.","SELECT sum(order_value) gmv, count(order_id) orders, sum(order_value)/count(order_id) aov FROM marts.fct_orders WHERE is_canceled = false"
+"What is the on-time delivery rate, as a percentage?",93.22690992018245,True,0.009974,"The on-time delivery rate is **93.2%**. Of 96,470 delivered orders, 89,936 arrived by the estimated delivery date, so the late rate is about 6.8%.
+
+I used the standard definition: delivered orders that weren't late, divided by all delivered orders. Canceled orders are excluded, and this covers the full period from Sep 2016 to Aug 2018.","SELECT count(*) AS delivered, sum(CASE WHEN NOT is_late THEN 1 ELSE 0 END) AS on_time, 100.0*sum(CASE WHEN NOT is_late THEN 1 ELSE 0 END)/count(*) AS on_time_pct, sum(CASE WHEN is_late IS NULL THEN 1 ELSE 0 END) AS null_late FROM marts.fct_orders WHERE is_canceled = false AND is_delivered = true"
+What percentage of delivered orders to Rio de Janeiro (RJ) customers arrived late?,12.105263157894736,True,0.010454000000000001,"**About 12.1% of delivered orders to Rio de Janeiro (RJ) customers arrived late:** 1,495 of 12,350.
+
+I used the standard late-rate definition: delivered orders where `is_late = true`, divided by all delivered orders, with canceled orders excluded. ""RJ customers"" means orders where `customer_state = 'RJ'`. No delivered orders were missing a late/on-time flag.","SELECT count(*) AS delivered, sum(CASE WHEN is_late THEN 1 ELSE 0 END) AS late, avg(CASE WHEN is_late THEN 1.0 ELSE 0 END) AS late_rate, sum(CASE WHEN is_late IS NULL THEN 1 ELSE 0 END) nulls FROM marts.fct_orders WHERE customer_state='RJ' AND is_delivered AND NOT is_canceled"
+"Among customer states with at least 300 delivered orders, which state has the highest late-delivery rate? Give the two-letter state code.",AL,True,0.01105,"The answer is **AL** (Alagoas). Among states with at least 300 delivered orders, it has the highest late-delivery rate: **21.4%**, or 85 of its 397 delivered orders arrived late. The next highest are MA at 17.4% (717 orders) and SE at 15.2% (335 orders).
+
+I used the standard late-rate definition: late delivered orders divided by all delivered orders. Canceled orders are excluded, and each order is assigned to the customer's state.","SELECT customer_state, count(*) AS delivered, 1 - avg(CASE WHEN is_late THEN 0 ELSE 1 END) AS late_rate
+FROM marts.fct_orders WHERE is_canceled = false AND is_delivered = true
+GROUP BY 1 HAVING count(*) >= 300 ORDER BY late_rate DESC LIMIT 5"
+What is the average review score of orders that arrived late?,2.270490518727472,True,0.008126,"Orders that arrived late averaged a review score of **2.27** out of 5, based on 6,381 reviewed late orders. On-time orders averaged **4.29** (89,443 reviewed), so late orders score about 2 points lower.
+
+Assumptions: I counted only orders that were delivered and not canceled, with `is_late = true`. The average includes only orders that have a review score.","SELECT is_late, avg(review_score) avg_score, count(review_score) n_reviewed, count(*) n
+FROM marts.fct_orders WHERE NOT is_canceled AND is_delivered GROUP BY is_late"
+"What is the repeat customer rate, as a percentage?",3.1187562437562435,True,0.010098,"The repeat customer rate is **3.12%**: 2,997 of 96,096 unique customers placed more than one order.
+
+I used the standard definition, which counts customers flagged `is_repeat_customer` in `dim_customer` against all customers, with each person counted once by `customer_unique_id`. I took the flag as it's stored in the table. I didn't check whether it already leaves out canceled orders, so the rate covers the whole Sep 2016 to Aug 2018 period.","SELECT count(*) AS customers, sum(CASE WHEN is_repeat_customer THEN 1 ELSE 0 END) AS repeat_customers, 100.0*avg(CASE WHEN is_repeat_customer THEN 1 ELSE 0 END) AS repeat_rate_pct FROM marts.dim_customer"
+How many sellers are on the platform?,3095,True,0.009214,"Olist has **3,095 sellers** (distinct sellers in `dim_seller`, Sep 2016 to Aug 2018). Of these, **3,053** sold at least one item in an order that wasn't canceled. The other 42 only appear in canceled orders.
+
+I counted every seller who appears at any point in the data as ""on the platform."" The warehouse doesn't record when sellers join or leave, so this is a total over the whole period, not how many are active right now.","SELECT count(*) AS sellers, count(DISTINCT seller_id) AS distinct_sellers, (SELECT count(DISTINCT seller_id) FROM marts.fct_order_items WHERE NOT is_canceled) AS sellers_noncanceled FROM marts.dim_seller"
+Which product category has the most orders? Give the category name as stored in the data.,bed_bath_table,True,0.008798,"The category with the most orders is **`bed_bath_table`**, with 9,399 orders. Next are `health_beauty` with 8,800 and `sports_leisure` with 7,673.
+
+Assumptions: I counted distinct orders that include at least one item from each category, and left out canceled orders. If an order has items from more than one category, it counts once for each of them.","SELECT p.category, count(DISTINCT i.order_id) AS orders
+FROM marts.fct_order_items i JOIN marts.dim_product p USING (product_id)
+WHERE NOT i.is_canceled
+GROUP BY 1 ORDER BY 2 DESC LIMIT 5"
+Which purchase month had the highest GMV? Answer in YYYY-MM format.,2017-11,True,0.0075899999999999995,"The month with the highest GMV was **2017-11**, with about R$1,172,192 from 7,423 orders. It only barely beats 2018-04 (about R$1,156,249) and 2018-03 (about R$1,152,657). I left out canceled orders and grouped orders by the month they were purchased.","SELECT strftime(purchase_date, '%Y-%m') ym, sum(order_value) gmv, count(*) n FROM marts.fct_orders WHERE NOT is_canceled GROUP BY 1 ORDER BY gmv DESC LIMIT 5"
+What percentage of orders were mainly paid by credit card?,75.4699305541413,True,0.008081999999999999,"**75.5% of orders were mainly paid by credit card** (74,116 of 98,207 non-canceled orders). Next came boleto at 19.9% (19,539 orders), then voucher at 3.1% and debit card at 1.5%.
+
+I left out canceled orders and counted each order once, using its `main_payment_type` from `fct_orders`. One order has no payment type recorded, but it's still in the total.","SELECT main_payment_type, count(*) n, round(100.0*count(*)/sum(count(*)) over (),2) pct FROM marts.fct_orders WHERE is_canceled=false GROUP BY 1 ORDER BY 2 DESC"
+"On average, how many days did delivered orders take from purchase to delivery?",12.496848761272934,True,0.008298,"On average, delivered orders took **about 12.5 days** from purchase to delivery. The median was 10 days. This covers 96,470 delivered orders that were not canceled.
+
+I used the `delivery_days` field in `fct_orders`, which counts whole days. Measuring from the exact purchase and delivery timestamps instead gives nearly the same average, 12.56 days.","SELECT count(*) n, avg(delivery_days) avg_days, median(delivery_days) med, count(delivery_days) nn, avg(date_diff('second', purchased_at, delivered_at))/86400.0 avg_exact FROM marts.fct_orders WHERE is_delivered AND NOT is_canceled"
+How many customers are in the 'Burned by late delivery' segment?,6187,True,0.008230000000000001,"There are **6,187 customers** in the ""Burned by late delivery"" segment. Every one of them has a late-delivery share of 1.0, which means all of their orders arrived late. That makes it the second-smallest of the five KMeans segments: only ""Repeat buyers"" is smaller, with 2,888. The largest is ""Happy, recent"", with 41,702.
+
+I took the count straight from `ml.customer_segments`, where each row is one person (`customer_unique_id`). I didn't apply any filter for canceled orders, because the segments are already built.","SELECT segment, count(*) n, avg(late_share) ls FROM ml.customer_segments GROUP BY segment ORDER BY n DESC"
+"For orders in the model's test period, what percentage of orders in the highest risk decile (10) arrived late?",11.281588447653428,True,0.030285,"In the test period (orders placed 1 Apr – 31 Jul 2018), **11.3%** of delivered orders in risk decile 10 arrived late: 375 out of 3,324. The late rate across all delivered test-period orders was 4.0%, so the riskiest decile ran about 2.8 times the average.
+
+One thing to flag: the same decile in the training period had a late rate of 49.9%. The test-period figure is far lower, which suggests the model is overfitting, the late rate fell in 2018, or both. Read the training-period results with caution.
+
+Assumptions: ""test period"" means rows where `split = 'test'` in `ml.order_late_risk`. ""Arrived late"" follows the late-rate definition: `is_late` divided by delivered orders (`is_delivered = true`), excluding canceled orders. Decile 10 had 3,398 orders, and the 74 that were never delivered aren't counted.","SELECT r.split, count(*) n, count(*) FILTER (WHERE o.is_delivered) delivered,
+ avg(CASE WHEN o.is_late THEN 1.0 ELSE 0 END) FILTER (WHERE o.is_delivered) late_rate,
+ count(*) FILTER (WHERE o.is_canceled) canceled
+FROM ml.order_late_risk r JOIN marts.fct_orders o USING(order_id)
+WHERE r.risk_decile = 10
+GROUP BY 1
+---
+SELECT count(*) FILTER (WHERE o.is_delivered) delivered,
+ count(*) FILTER (WHERE o.is_delivered AND o.is_late) late,
+ avg(CASE WHEN o.is_late THEN 1.0 ELSE 0 END) FILTER (WHERE o.is_delivered) late_rate,
+ min(o.purchase_date), max(o.purchase_date)
+FROM ml.order_late_risk r JOIN marts.fct_orders o USING(order_id)
+WHERE r.split='test' AND NOT o.is_canceled
+---
+SELECT count(*) FILTER (WHERE o.is_late) late, count(*) delivered
+FROM ml.order_late_risk r JOIN marts.fct_orders o USING(order_id)
+WHERE r.split='test' AND r.risk_decile=10 AND o.is_delivered AND NOT o.is_canceled"
+What is the total GMV in BRL of orders that arrived late?,1150892.129999997,True,0.009274000000000001,"I found 6,534 late orders, and their total GMV was **about R$1,150,892**. Every one of them was delivered, so this is the value of orders that actually arrived late.
+
+I used the standard definitions: GMV is item price plus freight, an order is late when `is_late = true`, and canceled orders are left out.","SELECT count(*) AS orders, sum(order_value) AS gmv,
+ sum(CASE WHEN is_delivered THEN order_value END) AS gmv_delivered, count(CASE WHEN is_delivered THEN 1 END) AS n_delivered
+FROM marts.fct_orders WHERE is_canceled = false AND is_late = true"
+How many orders received a 1-star review?,11363,True,0.009242,"**10,480 non-canceled orders got a 1-star review.** That's about 10.8% of the 97,473 non-canceled orders that have a review. If you count canceled orders too, the total is 11,363, which includes 883 canceled orders with 1-star reviews.
+
+I left canceled orders out of the main number, following the standard rule. Each order has a single review score in `fct_orders`, so each order is counted once.","SELECT count(*) AS orders_1star, count(*) FILTER (WHERE is_canceled) AS canceled_1star, (SELECT count(*) FROM marts.fct_orders WHERE NOT is_canceled AND review_score IS NOT NULL) AS reviewed FROM marts.fct_orders WHERE review_score = 1"
+Freight is what percentage of GMV?,14.242460933959068,True,0.009598,"Freight makes up **about 14.2% of GMV**. That's R$2.24M in freight out of R$15.74M total GMV across 98,207 orders that weren't canceled. The other R$13.49M (about 85.8%) is item prices, and the two parts add up exactly to GMV.
+
+I left out canceled orders and used the whole dataset (Sep 2016 to Aug 2018), with freight taken from `fct_orders.freight_value`.","SELECT sum(freight_value) freight, sum(order_value) gmv, sum(items_value) items, 100*sum(freight_value)/sum(order_value) pct, count(*) n, sum(case when order_value is null then 1 else 0 end) nulls FROM marts.fct_orders WHERE is_canceled = false"
+"Among 1-2 star reviews classified by AI, what is the most common complaint topic? Give the topic label.",not_received,True,0.015097,"The most common complaint topic is **`not_received`**. It covers 3,617 of the 10,839 AI-classified 1-2 star reviews (33.4%), about twice as many as the next topic, `missing_items` (1,765, 16.3%), followed by `not_as_described` (1,399, 12.9%).
+
+Excluding canceled orders doesn't change the ranking: `not_received` still leads with 3,259 reviews. I counted each row in `ai.review_insights` as one review.","SELECT topic, count(*) n, count(*)*1.0/sum(count(*)) over () share FROM ai.review_insights GROUP BY topic ORDER BY n DESC
+---
+SELECT r.topic, count(*) n FROM ai.review_insights r JOIN marts.fct_orders o USING(order_id) WHERE NOT o.is_canceled GROUP BY 1 ORDER BY n DESC LIMIT 3"
+How many AI-classified 1-2 star reviews are about missing items?,1765,True,0.016345,"**1,759** AI-classified 1-2 star reviews are about missing items, once canceled orders are left out. That's about 16% of the 10,839 classified reviews, which makes it the second most common topic. Only ""not received"" is bigger, with 3,617.
+
+Including canceled orders, the count is 1,765, so the 6 canceled orders barely change it.
+
+I counted reviews where Claude labelled the topic `missing_items` in `ai.review_insights` (one review per order). I didn't include related topics like ""not received"" or ""wrong item.""","SELECT topic, count(*) n, count(DISTINCT order_id) orders FROM ai.review_insights GROUP BY topic ORDER BY n DESC
+---
+SELECT count(*) total, count(*) FILTER (WHERE o.is_canceled) canceled, count(*) FILTER (WHERE o.is_canceled = false) non_canceled, (SELECT count(*) FROM ai.review_insights) all_reviews FROM ai.review_insights r LEFT JOIN marts.fct_orders o USING(order_id) WHERE r.topic='missing_items'"
