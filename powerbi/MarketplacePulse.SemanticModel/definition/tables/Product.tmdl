@@ -1,0 +1,22 @@
+table Product
+	lineageTag: eed6136f-19cd-4e5d-b9a7-d6c93ff8a30a
+
+	column product_id
+		dataType: string
+		lineageTag: b90e7872-97a1-41fc-a070-556c81ad4a29
+		sourceColumn: product_id
+
+	column category
+		dataType: string
+		lineageTag: ffda9f83-919b-4d9a-9761-56452ba4e285
+		sourceColumn: category
+
+	column weight_g
+		dataType: int64
+		lineageTag: d631cf52-1488-4fda-a002-8e08c330bfdd
+		sourceColumn: weight_g
+
+	partition Product = m
+		mode: import
+		source = let Source = Parquet.Document(File.Contents(DataFolder & "marts__dim_product.parquet")), Kept = Table.SelectColumns(Source, {"product_id", "category", "weight_g"}) in Kept
+

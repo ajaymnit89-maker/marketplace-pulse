@@ -1,0 +1,27 @@
+table 'Late Risk'
+	lineageTag: 89ace48c-87ad-4d23-be49-60e469108bae
+
+	column order_id
+		dataType: string
+		lineageTag: c5624bc4-f673-41c8-b5bd-1c5a880949ac
+		sourceColumn: order_id
+
+	column late_risk
+		dataType: double
+		lineageTag: f8745fce-2dfe-4f89-b52e-79404ac54f15
+		sourceColumn: late_risk
+
+	column risk_decile
+		dataType: int64
+		lineageTag: 1720202b-9b21-4bcc-9c40-25588a32d9e6
+		sourceColumn: risk_decile
+
+	column split
+		dataType: string
+		lineageTag: 6d49af4d-387f-4f16-9d32-7649b3da5183
+		sourceColumn: split
+
+	partition 'Late Risk' = m
+		mode: import
+		source = let Source = Parquet.Document(File.Contents(DataFolder & "ml__order_late_risk.parquet")), Kept = Table.SelectColumns(Source, {"order_id", "late_risk", "risk_decile", "split"}) in Kept
+

@@ -19,7 +19,8 @@ import pandas as pd
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parents[1]
-DB = ROOT / "data" / "warehouse.duckdb"
+# Full warehouse locally; the slim committed copy (app/build_app_db.py) when deployed.
+DB = next((p for p in (ROOT / "data" / "warehouse.duckdb", ROOT / "app" / "app.duckdb") if p.exists()), ROOT / "data" / "warehouse.duckdb")
 METRICS = ROOT / "dbt" / "models" / "marts" / "metrics.md"
 MODEL = "claude-opus-5-5"
 ALLOWED_SCHEMAS = ("marts", "ml", "ai")

@@ -1,0 +1,4 @@
+/// Folder holding the Parquet files written by app/build_app_db.py. Change this after cloning the repo.
+expression DataFolder = "C:\Users\RACHEL\Desktop\Projects\marketplace-pulse\data\export\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: fac1faf5-7f01-48bb-ba1a-8efbf6c10e59
+

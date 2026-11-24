@@ -1,0 +1,42 @@
+table Forecast
+	lineageTag: a4e4d690-0eb8-435c-842a-685dfa6fb8f4
+
+	column category
+		dataType: string
+		lineageTag: f92cabc3-8593-40fa-9905-1fa3a19d4b9b
+		sourceColumn: category
+
+	column week_start
+		dataType: dateTime
+		lineageTag: 48c2e7bc-f3ea-4917-924f-77cd2aca4aa1
+		sourceColumn: week_start
+
+	column actual_orders
+		dataType: double
+		lineageTag: 716c9fb1-614e-4056-9f36-731004539370
+		sourceColumn: actual_orders
+
+	column forecast
+		dataType: double
+		lineageTag: 0249e432-1cbb-440a-9d79-a3e5a7ffe20c
+		sourceColumn: forecast
+
+	column lo_80
+		dataType: double
+		lineageTag: 815860d5-2c67-4982-8199-6f279e4e998a
+		sourceColumn: lo_80
+
+	column hi_80
+		dataType: double
+		lineageTag: ee294d4a-c879-43e0-bffa-082f001d6851
+		sourceColumn: hi_80
+
+	column model
+		dataType: string
+		lineageTag: 6b738822-5dbb-4f2f-8e5d-86a5582bf3d0
+		sourceColumn: model
+
+	partition Forecast = m
+		mode: import
+		source = let Source = Parquet.Document(File.Contents(DataFolder & "ml__category_forecast.parquet")), Kept = Table.SelectColumns(Source, {"category", "week_start", "actual_orders", "forecast", "lo_80", "hi_80", "model"}) in Kept
+

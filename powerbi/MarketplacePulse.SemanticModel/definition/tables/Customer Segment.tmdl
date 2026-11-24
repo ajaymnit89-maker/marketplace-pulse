@@ -1,0 +1,32 @@
+table 'Customer Segment'
+	lineageTag: 61abd0cd-b0da-412a-b282-bc5bbbfa6cd4
+
+	column customer_unique_id
+		dataType: string
+		lineageTag: 071b0f0b-c478-4131-a39a-8d430dbe1612
+		sourceColumn: customer_unique_id
+
+	column segment
+		dataType: string
+		lineageTag: 381df780-8bce-4789-9e6e-05773c7521b4
+		sourceColumn: segment
+
+	column recency_days
+		dataType: int64
+		lineageTag: b02db0e3-9f36-44ca-831e-43e509267cc8
+		sourceColumn: recency_days
+
+	column frequency
+		dataType: int64
+		lineageTag: 32de9e84-c9cd-48be-896a-e22892375e53
+		sourceColumn: frequency
+
+	column monetary
+		dataType: double
+		lineageTag: 54c03ae6-db9b-484f-b1b2-4924c895710a
+		sourceColumn: monetary
+
+	partition 'Customer Segment' = m
+		mode: import
+		source = let Source = Parquet.Document(File.Contents(DataFolder & "ml__customer_segments.parquet")), Kept = Table.SelectColumns(Source, {"customer_unique_id", "segment", "recency_days", "frequency", "monetary"}) in Kept
+

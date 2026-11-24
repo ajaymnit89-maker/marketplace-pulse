@@ -17,6 +17,7 @@ dependencies = [
     "scipy>=1.18.1",
     "shap>=0.54.1",
     "statsforecast>=2.0.1",
+    "streamlit>=1.67.0",
 ]
 
 [dependency-groups]

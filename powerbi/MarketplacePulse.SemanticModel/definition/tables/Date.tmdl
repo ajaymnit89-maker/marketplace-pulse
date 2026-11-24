@@ -1,0 +1,54 @@
+table Date
+	lineageTag: 52d2ad9d-38ef-4d75-b025-e881d9a242ea
+	dataCategory: Time
+
+	column date_day
+		dataType: dateTime
+		isUnique
+		lineageTag: fede36df-6eb0-46b7-a5c6-fb0874ec2b70
+		sourceColumn: date_day
+
+	column year
+		dataType: int64
+		lineageTag: d245bb69-5c82-4838-bb98-1b2f8aedcf3a
+		sourceColumn: year
+
+	column quarter
+		dataType: int64
+		lineageTag: 6c3a9166-96d4-47ff-9199-504ffb15c178
+		sourceColumn: quarter
+
+	column month
+		dataType: int64
+		lineageTag: a1868726-ab3b-42c1-8e1a-89cb0783e045
+		sourceColumn: month
+
+	column year_month
+		dataType: string
+		lineageTag: 169d95bb-272b-4607-a93d-cbb38e3e6f9c
+		sourceColumn: year_month
+
+	column week_start
+		dataType: dateTime
+		lineageTag: acbbfacc-c615-4348-a72f-a855f90b0a2e
+		sourceColumn: week_start
+
+	column day_of_week
+		dataType: int64
+		lineageTag: 838e4afb-51ee-4ca4-af51-d2aca05789d6
+		sourceColumn: day_of_week
+
+	column day_name
+		dataType: string
+		lineageTag: 470cea3a-441e-4fe6-a351-720707cf6eba
+		sourceColumn: day_name
+
+	column is_weekend
+		dataType: boolean
+		lineageTag: 78ece8e4-7b97-4632-ae3b-7690fea62bce
+		sourceColumn: is_weekend
+
+	partition Date = m
+		mode: import
+		source = let Source = Parquet.Document(File.Contents(DataFolder & "marts__dim_date.parquet")), Kept = Table.SelectColumns(Source, {"date_day", "year", "quarter", "month", "year_month", "week_start", "day_of_week", "day_name", "is_weekend"}) in Kept
+

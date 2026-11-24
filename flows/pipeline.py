@@ -1,4 +1,4 @@
-"""End-to-end pipeline: raw CSVs -> DuckDB -> dbt marts -> ML outputs (-> AI review labels).
+"""End-to-end pipeline: raw CSVs -> DuckDB -> dbt marts -> ML outputs (-> AI review labels) -> app DB + Parquet.
 
     python flows/pipeline.py              # full run on data/raw (ingest, dbt, 3 models)
     python flows/pipeline.py --with-ai    # also classify any new 1-2 star reviews (costs API credit)
@@ -65,6 +65,12 @@ def classify_reviews():
     review_enrich.main()
 
 
+@task
+def export_app_data():
+    from app import build_app_db
+    build_app_db.main()
+
+
 @flow(name="marketplace-pulse")
 def pipeline(sample: bool = False, with_ai: bool = False):
     if sample:
@@ -81,6 +87,7 @@ def pipeline(sample: bool = False, with_ai: bool = False):
     segments()
     if with_ai:
         classify_reviews()
+    export_app_data()  # app/app.duckdb + Parquet for Power BI
 
 
 if __name__ == "__main__":

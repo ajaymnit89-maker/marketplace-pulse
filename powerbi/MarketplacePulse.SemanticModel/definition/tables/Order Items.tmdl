@@ -1,0 +1,70 @@
+table 'Order Items'
+	lineageTag: d916a342-d6b2-4cf2-a46b-f4c33bb06f60
+
+	/// GMV at item level, so it slices by Product and Seller. Totals match [GMV].
+	measure 'Item GMV' = CALCULATE(SUM('Order Items'[item_value]), Orders[is_canceled] = FALSE())
+		formatString: "R$"#,0
+		displayFolder: By product & seller
+		lineageTag: 80a22f05-687d-43c4-b76f-66703e1ed491
+
+	/// Distinct non-canceled orders containing the product/seller in context.
+	measure 'Orders (items)' = CALCULATE(DISTINCTCOUNT('Order Items'[order_id]), Orders[is_canceled] = FALSE())
+		formatString: #,0
+		displayFolder: By product & seller
+		lineageTag: 033b590a-4109-42e4-8d66-59d9e01167f4
+
+	/// Late Rate that slices by Product and Seller.
+	measure 'Late Rate (items)' = DIVIDE(CALCULATE(DISTINCTCOUNT('Order Items'[order_id]), Orders[is_late] = TRUE(), Orders[is_canceled] = FALSE()), CALCULATE(DISTINCTCOUNT('Order Items'[order_id]), Orders[is_delivered] = TRUE(), Orders[is_canceled] = FALSE()))
+		formatString: 0.0%
+		displayFolder: By product & seller
+		lineageTag: 5b0f021c-b3cb-4a6a-ad5e-dbb8e24fb09e
+
+	measure 'Seller Late-ship Rate (items)' = DIVIDE(CALCULATE(COUNTROWS('Order Items'), 'Order Items'[seller_shipped_late] = TRUE()), CALCULATE(COUNTROWS('Order Items'), NOT ISBLANK('Order Items'[seller_shipped_late])))
+		formatString: 0.0%
+		displayFolder: By product & seller
+		lineageTag: fa586039-8d21-4131-bdee-463fd8cbcbce
+
+	column order_id
+		dataType: string
+		lineageTag: 1f1da430-b4a4-43ae-9d51-9c7bc7193658
+		sourceColumn: order_id
+
+	column order_item_id
+		dataType: int64
+		lineageTag: e77f9bda-7d14-4bff-ad31-c4c9b9a6e6da
+		sourceColumn: order_item_id
+
+	column product_id
+		dataType: string
+		lineageTag: d8d4484f-19ec-41d4-af45-578b32881e8e
+		sourceColumn: product_id
+
+	column seller_id
+		dataType: string
+		lineageTag: 526735f4-a52d-41ad-8a4a-2541cfd21e7b
+		sourceColumn: seller_id
+
+	column seller_shipped_late
+		dataType: boolean
+		lineageTag: 635cd48a-d00e-4263-a1af-21e31813b97c
+		sourceColumn: seller_shipped_late
+
+	column price
+		dataType: double
+		lineageTag: bc129bed-4992-49a6-a768-08865134dbb9
+		sourceColumn: price
+
+	column freight_value
+		dataType: double
+		lineageTag: f58d866a-e130-472b-9b6c-39a1d498f724
+		sourceColumn: freight_value
+
+	column item_value
+		dataType: double
+		lineageTag: fdf8fe7d-943e-4927-8727-ee24ee6dd3f7
+		sourceColumn: item_value
+
+	partition 'Order Items' = m
+		mode: import
+		source = let Source = Parquet.Document(File.Contents(DataFolder & "marts__fct_order_items.parquet")), Kept = Table.SelectColumns(Source, {"order_id", "order_item_id", "product_id", "seller_id", "seller_shipped_late", "price", "freight_value", "item_value"}) in Kept
+

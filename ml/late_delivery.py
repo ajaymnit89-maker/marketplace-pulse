@@ -10,6 +10,7 @@ import lightgbm as lgb
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
+import pandas as pd
 import shap
 from sklearn.metrics import average_precision_score, roc_auc_score
 
@@ -94,6 +95,8 @@ def main():
     con.execute("create schema if not exists ml")
     con.execute("""create or replace table ml.order_late_risk as
                    select order_id, late_risk, ntile(10) over (order by late_risk) as risk_decile, split from out""")
+    m = pd.DataFrame([metrics])  # noqa: F841 (read by DuckDB below; the app shows these)
+    con.execute("create or replace table ml.late_model_metrics as select * from m")
     con.close()
 
     mlflow.set_tracking_uri(f"sqlite:///{(ROOT / 'mlflow.db').as_posix()}")

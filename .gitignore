@@ -11,3 +11,5 @@ dbt/.user.yml
 mlruns/
 mlflow.db
 data/ai/
+!app/app.duckdb
+data/export/

@@ -1,0 +1,32 @@
+table 'Review Insight'
+	lineageTag: 85bb3a9b-ea31-4d12-8559-6f28c9ecad62
+
+	column order_id
+		dataType: string
+		lineageTag: 659f66b4-91ac-472f-b689-a2f39625b6d4
+		sourceColumn: order_id
+
+	column topic
+		dataType: string
+		lineageTag: f5d68315-e624-4726-b80b-b723b0bc04e5
+		sourceColumn: topic
+
+	column sentiment
+		dataType: string
+		lineageTag: cb7d1b53-e803-4954-92c4-b67a3fc2262c
+		sourceColumn: sentiment
+
+	column mentions_delay
+		dataType: boolean
+		lineageTag: 39ca48b2-6b54-4094-a2e6-0ea6b61a2657
+		sourceColumn: mentions_delay
+
+	column translation_en
+		dataType: string
+		lineageTag: a2945467-8b12-43d0-8f60-d2e455226da7
+		sourceColumn: translation_en
+
+	partition 'Review Insight' = m
+		mode: import
+		source = let Source = Parquet.Document(File.Contents(DataFolder & "ai__review_insights.parquet")), Kept = Table.SelectColumns(Source, {"order_id", "topic", "sentiment", "mentions_delay", "translation_en"}) in Kept
+

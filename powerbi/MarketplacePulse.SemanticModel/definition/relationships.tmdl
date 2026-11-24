@@ -1,0 +1,34 @@
+relationship Orders_to_Date
+	fromColumn: Orders.purchase_date
+	toColumn: Date.date_day
+
+relationship Orders_to_Customer
+	fromColumn: Orders.customer_unique_id
+	toColumn: Customer.customer_unique_id
+
+relationship Items_to_Orders
+	fromColumn: 'Order Items'.order_id
+	toColumn: Orders.order_id
+
+relationship Items_to_Product
+	fromColumn: 'Order Items'.product_id
+	toColumn: Product.product_id
+
+relationship Items_to_Seller
+	fromColumn: 'Order Items'.seller_id
+	toColumn: Seller.seller_id
+
+relationship LateRisk_to_Orders
+	fromColumn: 'Late Risk'.order_id
+	toColumn: Orders.order_id
+
+relationship ReviewInsight_to_Orders
+	fromColumn: 'Review Insight'.order_id
+	toColumn: Orders.order_id
+
+relationship Segment_to_Customer
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Customer Segment'.customer_unique_id
+	toColumn: Customer.customer_unique_id
+

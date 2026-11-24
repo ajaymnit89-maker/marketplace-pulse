@@ -1,0 +1,32 @@
+table Seller
+	lineageTag: 0468dcee-6da4-4f2f-9684-c81c983e9c95
+
+	column seller_id
+		dataType: string
+		lineageTag: 1202b434-3f41-4729-9ad6-2379cd7d705a
+		sourceColumn: seller_id
+
+	column city
+		dataType: string
+		lineageTag: 7b217b8d-34cc-40a9-9e2d-6b87e056308a
+		sourceColumn: city
+
+	column state
+		dataType: string
+		lineageTag: 77f58613-707d-4d00-9a2d-4f55c8e9159a
+		sourceColumn: state
+
+	column first_sale_date
+		dataType: dateTime
+		lineageTag: f331b532-2f8a-4605-be72-8ad644ee47e9
+		sourceColumn: first_sale_date
+
+	column order_count
+		dataType: int64
+		lineageTag: e83ebf03-ae0c-4977-a3a5-08d8a594e8c2
+		sourceColumn: order_count
+
+	partition Seller = m
+		mode: import
+		source = let Source = Parquet.Document(File.Contents(DataFolder & "marts__dim_seller.parquet")), Kept = Table.SelectColumns(Source, {"seller_id", "city", "state", "first_sale_date", "order_count"}) in Kept
+
