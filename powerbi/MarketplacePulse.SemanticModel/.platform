@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "MarketplacePulse"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "6312424c-fed8-4353-a3d7-fdae0c90d20d"
+  }
+}

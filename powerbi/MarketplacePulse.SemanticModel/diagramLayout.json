@@ -1,0 +1,152 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 999.89193560762055,
+            "y": 601.18970664027393
+          },
+          "nodeIndex": "Customer",
+          "nodeLineageTag": "606c78f2-f8a5-48e3-91da-1e7d651c48ba",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1285.3031261572276,
+            "y": 700.730823759242
+          },
+          "nodeIndex": "Customer Segment",
+          "nodeLineageTag": "61abd0cd-b0da-412a-b282-bc5bbbfa6cd4",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 242.00392899007466,
+            "y": 515.37833199800434
+          },
+          "nodeIndex": "Date",
+          "nodeLineageTag": "52d2ad9d-38ef-4d75-b025-e881d9a242ea",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1519.3031261572276,
+            "y": 440.03379682994239
+          },
+          "nodeIndex": "Forecast",
+          "nodeLineageTag": "a4e4d690-0eb8-435c-842a-685dfa6fb8f4",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 569.07147977396073,
+            "y": 868.47460455917962
+          },
+          "nodeIndex": "Late Risk",
+          "nodeLineageTag": "89ace48c-87ad-4d23-be49-60e469108bae",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 337.07542971314069,
+            "y": 161.83154784814712
+          },
+          "nodeIndex": "Order Items",
+          "nodeLineageTag": "d916a342-d6b2-4cf2-a46b-f4c33bb06f60",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 528.44862184798092,
+            "y": 515.63264990185542
+          },
+          "nodeIndex": "Orders",
+          "nodeLineageTag": "81a83076-b67b-4577-93ae-8d0fe3640a7a",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 337.08180374054564,
+            "y": -50
+          },
+          "nodeIndex": "Product",
+          "nodeLineageTag": "eed6136f-19cd-4e5d-b9a7-d6c93ff8a30a",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 855.191614962032,
+            "y": 878.06759365988478
+          },
+          "nodeIndex": "Review Insight",
+          "nodeLineageTag": "85bb3a9b-ea31-4d12-8559-6f28c9ecad62",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 97.254352512391279
+          },
+          "nodeIndex": "Seller",
+          "nodeLineageTag": "0468dcee-6da4-4f2f-9684-c81c983e9c95",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

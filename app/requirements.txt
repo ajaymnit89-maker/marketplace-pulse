@@ -1,0 +1,7 @@
+# Streamlit Community Cloud installs this (not the full pyproject), so the app deploys without the ML stack.
+streamlit==1.67.0
+altair==6.3.0
+duckdb==2.0.1
+pandas==3.1.1
+anthropic==2.13.0
+python-dotenv==1.2.4
