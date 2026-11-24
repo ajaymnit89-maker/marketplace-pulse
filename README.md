@@ -83,4 +83,4 @@ For Power BI, run `uv run python app/build_app_db.py`, then open `powerbi/Market
 
 ## Data
 
-[Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. The raw files are not in this repo. `app/app.duckdb` and `tests/fixtures/olist_sample/` are derived from it under the same licence.
+Code: MIT (see [LICENSE](LICENSE)). Data: [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), CC BY-NC-SA 4.0. The raw files are not in this repo. `app/app.duckdb` and `tests/fixtures/olist_sample/` are derived from it under the same licence.
