@@ -40,7 +40,7 @@ def main():
                avg(review_score) as avg_review,
                coalesce(avg(is_late::int), 0) as late_share
         from marts.fct_orders where not is_canceled
-        group by 1
+        group by 1 order by 1  -- fixed row order keeps KMeans reproducible
     """).df()
     df["avg_review"] = df.avg_review.fillna(df.avg_review.median())  # ~0.7% never left a review
 

@@ -38,7 +38,7 @@ def capture_at(y, score, frac=0.1):
 
 def main():
     con = duckdb.connect(str(DB))
-    df = con.sql("select * from ml.ml_order_features").df()
+    df = con.sql("select * from ml.ml_order_features order by order_id").df()  # fixed order: reproducible model
     for c in CATEGORICAL:
         df[c] = df[c].astype("category")
     df["same_state"] = df.same_state.astype(float)

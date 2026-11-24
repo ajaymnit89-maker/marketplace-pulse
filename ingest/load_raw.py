@@ -56,14 +56,21 @@ def check(con, expect_counts=True):
     return failures
 
 
-if __name__ == "__main__":
-    missing = [f for f, _, _ in TABLES.values() if not (RAW_DIR / f).exists()]
+def run(raw_dir=RAW_DIR, db_path=DB_PATH, expect_counts=True):
+    """Load and check; raises if files are missing or any check fails."""
+    missing = [f for f, _, _ in TABLES.values() if not (Path(raw_dir) / f).exists()]
     if missing:
-        sys.exit(f"Missing files in {RAW_DIR}: {missing}")
-    with duckdb.connect(str(DB_PATH)) as con:
-        load(con)
-        failures = check(con)
-    for f in failures:
-        print("FAIL", f)
-    print("ingest ok" if not failures else f"{len(failures)} check(s) failed")
-    sys.exit(1 if failures else 0)
+        raise FileNotFoundError(f"Missing files in {raw_dir}: {missing}")
+    with duckdb.connect(str(db_path)) as con:
+        load(con, Path(raw_dir))
+        failures = check(con, expect_counts)
+    if failures:
+        raise ValueError("ingest checks failed: " + "; ".join(failures))
+    print(f"ingest ok: {raw_dir} -> {db_path}")
+
+
+if __name__ == "__main__":
+    try:
+        run()
+    except (FileNotFoundError, ValueError) as e:
+        sys.exit(str(e))
